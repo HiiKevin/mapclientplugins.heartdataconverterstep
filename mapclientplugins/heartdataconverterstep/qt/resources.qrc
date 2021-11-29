@@ -1,0 +1,6 @@
+
+<RCC>
+  <qresource prefix="heartdataconverterstep">
+    <file>images/utility.png</file>
+  </qresource>
+</RCC>
