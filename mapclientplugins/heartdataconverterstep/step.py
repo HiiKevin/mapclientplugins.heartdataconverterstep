@@ -3,11 +3,13 @@
 MAP Client Plugin Step
 """
 import json
-import heartcsv2ex.app
-import heartcsv2ex.csv2ex
+from heartcsv2ex.app import ProgramArguments, read_csv
+from heartcsv2ex.csv2ex import write_ex
+from heartcsv2ex.csvpoints import CSVPoint
 import os
 import sys
 import argparse
+import glob
 import pandas as pd
 from PySide2 import QtGui
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
@@ -51,21 +53,27 @@ class HeartDataConverterStep(WorkflowStepMountPoint):
         may be connected up to a button in a widget for example.
         """
         # Put your execute step code here before calling the '_doneExecution' method.
-        args = heartcsv2ex.app.ProgramArguments()
+        args = ProgramArguments()
         args.input_csvs=self._port0_inputDataFile
         args.output_ex=self._port1_inputDataFile
         if args.input_csvs:
             if os.path.exists(args.input_csvs):
-                if args.output_ex is None:
-                    output_ex = os.path.join(args.input_csvs, 'combined.ex')
+                n_frames = len(glob.glob(os.path.abspath(args.input_csvs)+"\\AV*.csv"))
+                contents = read_csv(args.input_csvs,n_frames)
+                if n_frames > 1:
+                    for frame, data in contents.items():
+                        if args.output_ex is None:
+                            output_ex = os.path.join(args.input_csvs, 'combined_{}.ex'.format(frame))
+                        else:
+                            output_ex = os.path.join(args.output_ex, 'combined_{}.ex'.format(frame))
+                        write_ex(output_ex, data)
                 else:
-                    output_ex = os.path.join(args.output_ex, 'combined.ex')
-                contents = heartcsv2ex.app.read_csv(args.input_csvs)
-                if contents is None:
-                    raise ValueError('empty content')
-                else:
-                    heartcsv2ex.csv2ex.write_ex(output_ex, contents)
-                    self._port2_outputExFile=output_ex
+                    if args.output_ex is None:
+                        output_ex = os.path.join(args.input_csvs, 'combined.ex')
+                    else:
+                        output_ex = os.path.join(args.output_ex, 'combined.ex')
+                    write_ex(output_ex, contents)
+                self._port2_outputExFile=os.path.abspath(output_ex+'\\..')
             else:
                 raise TypeError('no path to input')
         else:
