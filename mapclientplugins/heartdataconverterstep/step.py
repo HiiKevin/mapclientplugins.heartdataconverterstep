@@ -3,9 +3,7 @@
 MAP Client Plugin Step
 """
 import json
-from heartcsv2ex.app import ProgramArguments, read_csv
-from heartcsv2ex.csv2ex import write_ex
-from heartcsv2ex.csvpoints import CSVPoint
+
 import os
 import sys
 import argparse
@@ -14,6 +12,7 @@ import pandas as pd
 from PySide2 import QtGui
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.heartdataconverterstep.configuredialog import ConfigureDialog
+from mapclientplugins.heartdataconverterstep.app import ProgramArguments, read_csv, write_ex
 
 
 class HeartDataConverterStep(WorkflowStepMountPoint):
